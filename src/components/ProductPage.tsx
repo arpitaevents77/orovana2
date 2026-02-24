@@ -1,11 +1,20 @@
 import { useState } from 'react';
 import { Star, Plus, Minus, ShoppingCart, Zap, Shield, Leaf, Heart, ChevronLeft, ChevronRight, Award, CheckCircle } from 'lucide-react';
+import { useCart } from '../contexts/CartContext';
+import toast from 'react-hot-toast';
 
-const ProductPage = () => {
+interface ProductPageProps {
+  productId?: string | null;
+}
+
+const ProductPage = ({ productId }: ProductPageProps) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState('250g');
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('benefits');
+  const [loading, setLoading] = useState(false);
+  
+  const { addToCart } = useCart();
 
   const product = {
     name: "Himalayan Ashwagandha Powder",
@@ -77,6 +86,17 @@ const ProductPage = () => {
   const getCurrentOriginalPrice = () => {
     const sizeData = product.sizes.find(s => s.size === selectedSize);
     return sizeData ? sizeData.originalPrice : product.originalPrice;
+  };
+
+  const handleAddToCart = async () => {
+    setLoading(true);
+    try {
+      await addToCart(product.id || '1', quantity, selectedSize);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -213,9 +233,13 @@ const ProductPage = () => {
             </div>
 
             {/* Add to Cart */}
-            <button className="w-full bg-forest-green text-white py-4 rounded-lg font-semibold hover:bg-green-800 transition-colors flex items-center justify-center space-x-2">
+            <button 
+              onClick={handleAddToCart}
+              disabled={loading}
+              className="w-full bg-forest-green text-white py-4 rounded-lg font-semibold hover:bg-green-800 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <ShoppingCart className="w-5 h-5" />
-              <span>Add to Cart</span>
+              <span>{loading ? 'Adding...' : 'Add to Cart'}</span>
             </button>
 
             {/* Batch Information */}
@@ -393,7 +417,7 @@ const ProductPage = () => {
           </div>
           <button className="bg-forest-green text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-800 transition-colors flex items-center space-x-2">
             <ShoppingCart className="w-4 h-4" />
-            <span>Add to Cart</span>
+            <span>{loading ? 'Adding...' : 'Add to Cart'}</span>
           </button>
         </div>
       </div>

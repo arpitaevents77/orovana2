@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Star, ShoppingCart } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useCart } from '../../contexts/CartContext';
+import toast from 'react-hot-toast';
 
 interface ProductSectionsProps {
   onProductClick?: (productId: string) => void;
@@ -10,6 +12,7 @@ interface ProductSectionsProps {
 const ProductSections = ({ onProductClick, onSeeAllClick }: ProductSectionsProps) => {
   const [sections, setSections] = useState<any>({});
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
 
   const sectionConfigs = [
     { key: 'trending', title: 'Trending Now', field: 'is_trending' },
@@ -56,10 +59,10 @@ const ProductSections = ({ onProductClick, onSeeAllClick }: ProductSectionsProps
   const ProductCard = ({ product }: { product: any }) => (
     <div 
       className="flex-shrink-0 w-64 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden cursor-pointer"
-      onClick={() => onProductClick?.(product.id)}
     >
       <div className="relative">
         <img 
+          onClick={() => onProductClick?.(product.id)}
           src={product.images?.[0] || 'https://images.pexels.com/photos/4021779/pexels-photo-4021779.jpeg'} 
           alt={product.name}
           className="w-full h-48 object-cover"
@@ -72,7 +75,10 @@ const ProductSections = ({ onProductClick, onSeeAllClick }: ProductSectionsProps
       </div>
 
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-charcoal mb-2 line-clamp-2">
+        <h3 
+          onClick={() => onProductClick?.(product.id)}
+          className="text-lg font-semibold text-charcoal mb-2 line-clamp-2 cursor-pointer hover:text-forest-green"
+        >
           {product.name}
         </h3>
 
@@ -93,7 +99,18 @@ const ProductSections = ({ onProductClick, onSeeAllClick }: ProductSectionsProps
           </div>
         </div>
 
-        <button className="w-full bg-forest-green text-white py-2 rounded-lg font-semibold hover:bg-green-800 transition-colors flex items-center justify-center space-x-2">
+        <button
+          onClick={async () => {
+            try {
+              await addToCart(product.id);
+              toast.success("Added to cart");
+            } catch (error) {
+              console.error("Error adding to cart:", error);
+              toast.error("Failed to add to cart");
+            }
+          }}
+          className="w-full bg-forest-green text-white py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-green-800 transition-colors"
+        >
           <ShoppingCart size={16} />
           <span>Add to Cart</span>
         </button>

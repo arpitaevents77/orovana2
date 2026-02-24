@@ -6,7 +6,11 @@ import OrderHistory from './OrderHistory';
 import CartSection from './CartSection';
 import NotificationsSection from './NotificationsSection';
 
-const UserDashboard = () => {
+interface UserDashboardProps {
+  onCheckout?: () => void;
+}
+
+const UserDashboard = ({ onCheckout }: UserDashboardProps) => {
   const [activeTab, setActiveTab] = useState('profile');
   const { user, userProfile, signOut } = useAuth();
 
@@ -76,7 +80,7 @@ const UserDashboard = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6">
               {activeTab === 'profile' && <ProfileSection />}
               {activeTab === 'orders' && <OrderHistory />}
-              {activeTab === 'cart' && <CartSection />}
+              {activeTab === 'cart' && <CartSection onCheckout={onCheckout} />}
               {activeTab === 'addresses' && <AddressesSection />}
               {activeTab === 'notifications' && <NotificationsSection />}
               {activeTab === 'settings' && <SettingsSection />}

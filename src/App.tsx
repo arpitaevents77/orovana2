@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
 import Navigation from './components/Navigation';
 import Hero from './components/Hero';
 import ProductSections from './components/shop/ProductSections';
@@ -15,11 +17,14 @@ import ShopPage from './components/ShopPage';
 import AboutPage from './components/AboutPage';
 import ContactPage from './components/ContactPage';
 import UserDashboard from './components/dashboard/UserDashboard';
+import CheckoutPage from './components/CheckoutPage';
+import OrderSuccessPage from './components/OrderSuccessPage';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [checkoutSessionId, setCheckoutSessionId] = useState<string | null>(null);
 
   const renderPage = () => {
     switch (currentPage) {
@@ -32,7 +37,16 @@ function App() {
       case 'contact':
         return <ContactPage />;
       case 'dashboard':
-        return <UserDashboard />;
+        return <UserDashboard onCheckout={() => setCurrentPage('checkout')} />;
+      case 'checkout':
+        return <CheckoutPage onBack={() => setCurrentPage('dashboard')} />;
+      case 'order-success':
+        return (
+          <OrderSuccessPage 
+            sessionId={checkoutSessionId}
+            onContinueShopping={() => setCurrentPage('home')}
+          />
+        );
       default:
         return (
           <>
@@ -60,11 +74,23 @@ function App() {
 
   return (
     <AuthProvider>
-      <div className="min-h-screen">
-        <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
-        {renderPage()}
-        <Footer />
-      </div>
+      <CartProvider>
+        <div className="min-h-screen">
+          <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
+          {renderPage()}
+          {currentPage !== 'checkout' && currentPage !== 'order-success' && <Footer />}
+        </div>
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: '#1B4332',
+              color: '#fff',
+            },
+          }}
+        />
+      </CartProvider>
     </AuthProvider>
   );
 }

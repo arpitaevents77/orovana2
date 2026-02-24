@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Menu, X, ShoppingBag, User } from 'lucide-react';
+import { Menu, X, ShoppingBag, User, Badge } from 'lucide-react';
 import { useBrandSettings } from '../hooks/useBrandSettings';
 import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
 import AuthModal from './auth/AuthModal';
 
 interface NavigationProps {
@@ -16,6 +17,7 @@ const Navigation = ({ currentPage, setCurrentPage }: NavigationProps) => {
   
   const { brandSettings, loading } = useBrandSettings();
   const { user, userProfile } = useAuth();
+  const { getCartCount } = useCart();
 
   const navItems = [
     { id: 'home', label: 'Home' },
@@ -110,11 +112,16 @@ const Navigation = ({ currentPage, setCurrentPage }: NavigationProps) => {
 
             {/* Right Side Actions */}
             <div className="flex items-center space-x-4">
-              <button 
+              <button
                 onClick={() => handleNavClick('shop')}
                 className="p-2 text-charcoal hover:text-forest-green transition-colors relative"
               >
                 <ShoppingBag size={20} />
+                {getCartCount() > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-terracotta text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {getCartCount()}
+                  </span>
+                )}
               </button>
               
               {user ? (
